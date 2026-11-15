@@ -42,17 +42,45 @@ function mensagemDeErro(estado) {
 
 // ===== Funções que os composables usam =====
 
+// ===== Funções que os composables usam =====
+
 export function obterPopulares(pagina = 1) {
   return pedir("/movie/popular", { page: pagina });
 }
 
-
-
-export function pesquisarFilmes(texto, pagina = 1) {
-  return pedir("/search/movie", { query: texto, page: pagina });
+// Pesquisa por texto (só aceita filtrar por ano)
+export function pesquisarFilmes(texto, pagina = 1, ano = "") {
+  return pedir("/search/movie", {
+    query: texto,
+    page: pagina,
+    primary_release_year: ano,
+  });
 }
 
+// Lista com filtros: género, ano, nota mínima, país e ordem
+export function descobrirFilmes(filtros = {}, pagina = 1) {
+  const { genero, ano, notaMin, pais, ordem } = filtros;
+  const porNota = ordem === "vote_average.desc" || notaMin;
+  const hoje = new Date().toISOString().slice(0, 10);
 
+  return pedir("/discover/movie", {
+    page: pagina,
+    with_genres: genero,
+    primary_release_year: ano,
+    with_origin_country: pais,
+    "vote_average.gte": notaMin,
+    // Evita filmes com nota 10 dada por 2 pessoas
+    "vote_count.gte": porNota && !pais ? 200 : undefined,
+    // Não mostra filmes que ainda não estrearam
+    "primary_release_date.lte": hoje,
+    sort_by: ordem || "popularity.desc",
+  });
+}
+
+// A lista de géneros (Acção, Comédia...) já traduzida
+export function obterGeneros() {
+  return pedir("/genre/movie/list");
+}
 // Endereço completo de uma imagem (póster ou fundo)
 export function urlImagem(caminho, tamanho = "w342") {
   return caminho ? `https://image.tmdb.org/t/p/${tamanho}${caminho}` : null;

@@ -1,7 +1,7 @@
 import { ref, computed, watch } from "vue";
-import { obterPopulares, pesquisarFilmes } from "@/services/tmdb";
+import { pesquisarFilmes, descobrirFilmes } from "@/services/tmdb";
 
-// criterios: um computed com o que o utilizador escolheu (por agora, só a pesquisa)
+// criterios: computed com { pesquisa, genero, ano, notaMin, pais, ordem }
 export function useFilmes(criterios) {
   const filmes = ref([]);
   const aCarregar = ref(false);
@@ -9,17 +9,30 @@ export function useFilmes(criterios) {
 
   const pagina = ref(1);
   const totalPaginas = ref(1);
-  const totalResultados = ref(0);
+  const totalResultados = ref(null);
 
   // Conta os pedidos para ignorar respostas antigas
-  // (quem escreve depressa faz vários pedidos seguidos)
   let pedidoActual = 0;
 
   // Escolhe o endpoint certo conforme os critérios
-  function pedirPagina(numero) {
-    const { pesquisa } = criterios.value;
-    if (pesquisa) return pesquisarFilmes(pesquisa, numero);
-    return obterPopulares(numero);
+  async function pedirPagina(numero) {
+    const { pesquisa, genero, ano, notaMin } = criterios.value;
+
+    // Sem texto: a TMDB filtra tudo por nós
+    if (!pesquisa) return descobrirFilmes(criterios.value, numero);
+
+    // Com texto: a pesquisa da TMDB só filtra por ano,
+    // por isso o género e a nota são filtrados aqui, no navegador
+    const dados = await pesquisarFilmes(pesquisa, numero, ano);
+    if (genero || notaMin) {
+      dados.results = dados.results.filter(
+        (f) =>
+          (!genero || f.genre_ids.includes(Number(genero))) &&
+          (!notaMin || f.vote_average >= Number(notaMin))
+      );
+      dados.total_results = null; // o total da TMDB já não é exacto
+    }
+    return dados;
   }
 
   async function carregar(novaPagina = 1) {
@@ -52,8 +65,7 @@ export function useFilmes(criterios) {
     carregar(pagina.value + 1);
   }
 
-  // Sempre que os critérios mudam, recomeça da página 1.
-  // immediate: true → também corre logo da primeira vez (substitui o onMounted)
+  // Sempre que os critérios mudam, recomeça da página 1
   watch(criterios, () => carregar(1), { immediate: true, deep: true });
 
   return { filmes, aCarregar, erro, temMais, totalResultados, carregar, carregarMais };
