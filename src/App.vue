@@ -24,7 +24,7 @@ const ligacoesAutor = [
     </p>
 
     <p class="autor">
-      Desenvolvido por <strong>Bill Arsénio Ndayisaba</strong> · LECC31 · ISUTC ·
+      Desenvolvido por <strong>Bill Arsénio Ndayisaba</strong>
       {{ new Date().getFullYear() }}
     </p>
 
@@ -40,7 +40,7 @@ const ligacoesAutor = [
     <p class="atribuicao">
       Dados e imagens fornecidos pela
       <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a>.
-      Este produto usa a API da TMDB, mas não é endossado nem certificado pela TMDB.
+  
     </p>
   </footer>
 </template>
