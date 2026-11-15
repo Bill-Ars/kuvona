@@ -40,7 +40,7 @@ const ligacoes = [
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(6, 7, 12, 0.6);
+  background: rgba(18, 12, 22, 0.55);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
