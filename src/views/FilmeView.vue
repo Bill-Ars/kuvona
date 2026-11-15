@@ -200,15 +200,26 @@ function voltar() {
             </a>
           </p>
         </div>
-        <p v-else class="texto-suave">
-          Ainda não há informação sobre plataformas para este filme. Pode estar ainda no
-          cinema — experimenta procurar nas fontes abaixo.
-        </p>
+        <!-- Sem dados da TMDB: os botões de pesquisa passam a ser a resposta -->
+        <div v-else class="cartao-bloco vidro">
+          <p class="aviso-pais">
+            Este filme ainda não tem plataformas indicadas (pode estar ainda no cinema).
+            Procura-o directamente:
+          </p>
+          <ul class="lista-fontes">
+            <li v-for="f in fontes" :key="f.nome">
+              <a :href="f.link" target="_blank" rel="noopener" class="botao-secundario">
+                <Search :size="14" />
+                {{ f.nome }}
+              </a>
+            </li>
+          </ul>
+        </div>
 
-        <!-- Aparece sempre: pesquisa o filme noutras plataformas -->
-        <div class="outras-fontes">
+        <!-- Com dados: os botões de pesquisa ficam por baixo, como extra -->
+        <div v-if="ondeVer" class="outras-fontes">
           <h4>Procurar noutras fontes</h4>
-          <ul>
+          <ul class="lista-fontes">
             <li v-for="f in fontes" :key="f.nome">
               <a :href="f.link" target="_blank" rel="noopener" class="botao-secundario">
                 <Search :size="14" />
@@ -470,14 +481,14 @@ function voltar() {
   color: var(--texto-suave);
   margin-bottom: 0.6rem;
 }
-.outras-fontes ul {
+.lista-fontes {
   list-style: none;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
 }
-.outras-fontes a {
+.lista-fontes a {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
