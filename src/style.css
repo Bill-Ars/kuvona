@@ -1,0 +1,88 @@
+/* ===== Kuvona: estilos globais ===== */
+/* Cores inspiradas na bandeira e nas capulanas de Moçambique */
+:root {
+  --cor-verde: #009a44;
+  --cor-amarelo: #fcd116;
+  --cor-vermelho: #d21034;
+
+  --cor-fundo: #0e0e13;
+  --cor-fundo-barra: rgba(14, 14, 19, 0.9);
+  --cor-cartao: #1b1b24;
+  --cor-borda: #2a2a36;
+  --cor-texto: #f2f2f5;
+  --cor-texto-suave: #a3a3b2;
+
+  --raio: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1 {
+  margin-bottom: 0.75rem;
+}
+
+ul {
+  padding-left: 1.2rem;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Largura máxima do conteúdo, centrado */
+.contentor {
+  width: min(1200px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+main.contentor {
+  padding-top: 2rem;
+}
+
+/* Botões reutilizáveis */
+.botao {
+  display: inline-block;
+  background: var(--cor-vermelho);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.botao:hover {
+  transform: translateY(-2px);
+}
+
+.botao-secundario {
+  background: transparent;
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+.botao-secundario:hover {
+  border-color: var(--cor-amarelo);
+}
