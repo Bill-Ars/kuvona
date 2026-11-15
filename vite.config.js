@@ -6,6 +6,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // O GitHub Pages serve a app em https://bill-ars.github.io/kuvona/
+  base: '/kuvona/',
   plugins: [
     vue(),
     vueDevTools(),

@@ -5,7 +5,10 @@ defineProps({
   titulo: { type: String, required: true },
   plataformas: { type: Array, required: true },
 });
+
+
 </script>
+
 
 <template>
   <div v-if="plataformas.length" class="grupo">
@@ -18,6 +21,7 @@ defineProps({
     </ul>
   </div>
 </template>
+
 
 <style scoped>
 .grupo + .grupo {
