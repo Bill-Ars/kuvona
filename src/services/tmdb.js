@@ -46,6 +46,13 @@ export function obterPopulares(pagina = 1) {
   return pedir("/movie/popular", { page: pagina });
 }
 
+
+
+export function pesquisarFilmes(texto, pagina = 1) {
+  return pedir("/search/movie", { query: texto, page: pagina });
+}
+
+
 // Endereço completo de uma imagem (póster ou fundo)
 export function urlImagem(caminho, tamanho = "w342") {
   return caminho ? `https://image.tmdb.org/t/p/${tamanho}${caminho}` : null;

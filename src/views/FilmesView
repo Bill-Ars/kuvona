@@ -1,0 +1,112 @@
+<script setup>
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import CartaoFilme from "@/components/CartaoFilme.vue";
+import BarraPesquisa from "@/components/BarraPesquisa.vue";
+import { useFilmes } from "@/composables/useFilmes";
+
+const route = useRoute();
+const router = useRouter();
+
+// A pesquisa vive no URL: #/filmes?q=rei leão
+const pesquisa = computed(() => route.query.q ?? "");
+
+// Os critérios que o composable observa
+const criterios = computed(() => ({ pesquisa: pesquisa.value }));
+
+const { filmes, aCarregar, erro, temMais, totalResultados, carregar, carregarMais } =
+  useFilmes(criterios);
+
+// A barra avisa → nós mudamos o URL → o composable reage sozinho
+function aoPesquisar(texto) {
+  router.replace({
+    name: "filmes",
+    query: texto ? { q: texto } : {},
+  });
+}
+
+const titulo = computed(() =>
+  pesquisa.value ? `Resultados para "${pesquisa.value}"` : "Filmes em alta"
+);
+</script>
+
+<template>
+  <section>
+    <h1>{{ titulo }}</h1>
+    <p class="subtitulo">
+      <template v-if="pesquisa && !aCarregar">
+        {{ totalResultados }} filme(s) encontrado(s)
+      </template>
+      <template v-else-if="!pesquisa">
+        Os filmes mais vistos do momento, em todo o mundo.
+      </template>
+    </p>
+
+    <BarraPesquisa :valor="pesquisa" @pesquisar="aoPesquisar" />
+
+    <!-- Erro -->
+    <div v-if="erro" class="aviso-erro">
+      <p>😕 {{ erro }}</p>
+      <button class="botao" @click="carregar()">Tentar de novo</button>
+    </div>
+
+    <!-- Sem resultados -->
+    <div v-else-if="!aCarregar && filmes.length === 0" class="vazio">
+      <p>🎞️ Nenhum filme encontrado para "{{ pesquisa }}".</p>
+      <p>Experimenta outro nome ou o título original, em inglês.</p>
+    </div>
+
+    <!-- Sucesso: a grelha de cartões -->
+    <div class="grelha">
+      <CartaoFilme v-for="filme in filmes" :key="filme.id" :filme="filme" />
+    </div>
+
+    <!-- A carregar -->
+    <p v-if="aCarregar" class="a-carregar">A carregar filmes...</p>
+
+    <!-- Navegar pela lista: mais páginas -->
+    <div v-if="temMais && !aCarregar && !erro" class="mais">
+      <button class="botao" @click="carregarMais">Carregar mais filmes</button>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.subtitulo {
+  color: var(--cor-texto-suave);
+  margin-bottom: 1.5rem;
+  min-height: 1.6em;
+}
+.grelha {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.25rem;
+}
+.a-carregar {
+  text-align: center;
+  padding: 2rem;
+  color: var(--cor-texto-suave);
+}
+.aviso-erro,
+.vazio {
+  text-align: center;
+  padding: 2rem;
+  background: var(--cor-cartao);
+  border-radius: var(--raio);
+  margin-bottom: 1.5rem;
+}
+.aviso-erro {
+  border: 1px solid var(--cor-vermelho);
+}
+.aviso-erro p {
+  margin-bottom: 1rem;
+}
+.vazio p + p {
+  color: var(--cor-texto-suave);
+  margin-top: 0.5rem;
+}
+.mais {
+  text-align: center;
+  margin-top: 2rem;
+}
+</style>

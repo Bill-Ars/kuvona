@@ -1,36 +1,48 @@
-import { ref, computed } from "vue";
-import { obterPopulares } from "@/services/tmdb";
+import { ref, computed, watch } from "vue";
+import { obterPopulares, pesquisarFilmes } from "@/services/tmdb";
 
-// Os três estados de um pedido: dados, a carregar, erro (aula 14, bloco 2)
-export function useFilmes() {
+// criterios: um computed com o que o utilizador escolheu (por agora, só a pesquisa)
+export function useFilmes(criterios) {
   const filmes = ref([]);
   const aCarregar = ref(false);
   const erro = ref("");
 
   const pagina = ref(1);
   const totalPaginas = ref(1);
+  const totalResultados = ref(0);
+
+  // Conta os pedidos para ignorar respostas antigas
+  // (quem escreve depressa faz vários pedidos seguidos)
+  let pedidoActual = 0;
+
+  // Escolhe o endpoint certo conforme os critérios
+  function pedirPagina(numero) {
+    const { pesquisa } = criterios.value;
+    if (pesquisa) return pesquisarFilmes(pesquisa, numero);
+    return obterPopulares(numero);
+  }
 
   async function carregar(novaPagina = 1) {
+    const estePedido = ++pedidoActual;
     aCarregar.value = true;
     erro.value = "";
-    try {
-      const dados = await obterPopulares(novaPagina);
+    if (novaPagina === 1) filmes.value = [];
 
-      if (novaPagina === 1) {
-        filmes.value = dados.results;
-      } else {
-        // Junta a nova página à lista, sem repetir filmes
-        const ids = new Set(filmes.value.map((f) => f.id));
-        const novos = dados.results.filter((f) => !ids.has(f.id));
-        filmes.value = [...filmes.value, ...novos];
-      }
+    try {
+      const dados = await pedirPagina(novaPagina);
+      if (estePedido !== pedidoActual) return; // chegou tarde: ignorar
+
+      const ids = new Set(filmes.value.map((f) => f.id));
+      const novos = dados.results.filter((f) => !ids.has(f.id));
+      filmes.value = [...filmes.value, ...novos];
 
       pagina.value = dados.page;
-      totalPaginas.value = Math.min(dados.total_pages, 500); // a TMDB só deixa ir até à 500
+      totalPaginas.value = Math.min(dados.total_pages, 500);
+      totalResultados.value = dados.total_results;
     } catch (e) {
-      erro.value = e.message;
+      if (estePedido === pedidoActual) erro.value = e.message;
     } finally {
-      aCarregar.value = false;
+      if (estePedido === pedidoActual) aCarregar.value = false;
     }
   }
 
@@ -40,5 +52,9 @@ export function useFilmes() {
     carregar(pagina.value + 1);
   }
 
-  return { filmes, aCarregar, erro, temMais, carregar, carregarMais };
+  // Sempre que os critérios mudam, recomeça da página 1.
+  // immediate: true → também corre logo da primeira vez (substitui o onMounted)
+  watch(criterios, () => carregar(1), { immediate: true, deep: true });
+
+  return { filmes, aCarregar, erro, temMais, totalResultados, carregar, carregarMais };
 }
