@@ -71,7 +71,7 @@ src/
 ## Autor
 
 **Bill Arsénio Ndayisaba** · [GitHub: Bill-Ars](https://github.com/Bill-Ars)
-Programação Web II · LECC31 · ISUTC
+
 
 ---
 
