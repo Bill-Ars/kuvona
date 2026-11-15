@@ -8,7 +8,17 @@ const PAISES_ONDE_VER = [
   { codigo: "ZA", nome: "África do Sul" },
   { codigo: "PT", nome: "Portugal" },
   { codigo: "BR", nome: "Brasil" },
+  { codigo: "US", nome: "Estados Unidos" },
+  { codigo: "GB", nome: "Reino Unido" },
 ];
+
+// Para os outros países, o próprio browser traduz o código: "FR" → "França"
+const nomesPaises = new Intl.DisplayNames(["pt"], { type: "region" });
+
+// Um país só conta se tiver pelo menos uma plataforma
+function temPlataformas(dados) {
+  return Boolean(dados && (dados.flatrate || dados.rent || dados.buy));
+}
 
 // id: um computed com o id do filme que vem do URL
 export function useFilme(id) {
@@ -63,23 +73,27 @@ export function useFilme(id) {
     return videos.find((v) => v.iso_639_1 === "pt") ?? videos[0] ?? null;
   });
 
-  // Onde ver: o primeiro país da lista que tenha dados
+  // Onde ver: o primeiro país da lista que tenha dados.
+  // Se nenhum tiver, usa qualquer outro país com plataformas.
   const ondeVer = computed(() => {
     const resultados = filme.value?.["watch/providers"]?.results ?? {};
-    for (const pais of PAISES_ONDE_VER) {
-      const dados = resultados[pais.codigo];
-      if (dados && (dados.flatrate || dados.rent || dados.buy)) {
-        return {
-          pais: pais.nome,
-          eMocambique: pais.codigo === "MZ",
-          link: dados.link,
-          subscricao: dados.flatrate ?? [],
-          alugar: dados.rent ?? [],
-          comprar: dados.buy ?? [],
-        };
-      }
+
+    let codigo = PAISES_ONDE_VER.find((p) => temPlataformas(resultados[p.codigo]))?.codigo;
+    if (!codigo) {
+      codigo = Object.keys(resultados).find((c) => temPlataformas(resultados[c]));
     }
-    return null;
+    if (!codigo) return null;
+
+    const dados = resultados[codigo];
+    const nomeConhecido = PAISES_ONDE_VER.find((p) => p.codigo === codigo)?.nome;
+    return {
+      pais: nomeConhecido ?? nomesPaises.of(codigo),
+      eMocambique: codigo === "MZ",
+      link: dados.link,
+      subscricao: dados.flatrate ?? [],
+      alugar: dados.rent ?? [],
+      comprar: dados.buy ?? [],
+    };
   });
 
   const recomendacoes = computed(

@@ -39,9 +39,10 @@ const { filme, aCarregar, erro, carregar, elenco, realizador, trailer, ondeVer, 
 const fundo = computed(() => urlImagem(filme.value?.backdrop_path, "w1280"));
 const poster = computed(() => urlImagem(filme.value?.poster_path, "w500"));
 
-// Links de pesquisa: Netflix, YouTube, Prime Video e Google
+// Links de pesquisa: Netflix, YouTube, Prime Video e Google.
+// Usa o título original, que as plataformas encontram melhor
 const fontes = computed(() =>
-  filme.value ? outrasFontes(filme.value.title, filme.value.release_date?.slice(0, 4)) : []
+  filme.value ? outrasFontes(filme.value.original_title, filme.value.release_date?.slice(0, 4)) : []
 );
 
 // O trailer só carrega quando se carrega no botão (poupa dados móveis)
@@ -177,19 +178,19 @@ function voltar() {
           <ListaPlataformas
             titulo="Incluído na subscrição"
             :plataformas="ondeVer.subscricao"
-            :titulo-filme="filme.title"
+            :titulo-filme="filme.original_title"
             :link-geral="ondeVer.link"
           />
           <ListaPlataformas
             titulo="Alugar"
             :plataformas="ondeVer.alugar"
-            :titulo-filme="filme.title"
+            :titulo-filme="filme.original_title"
             :link-geral="ondeVer.link"
           />
           <ListaPlataformas
             titulo="Comprar"
             :plataformas="ondeVer.comprar"
-            :titulo-filme="filme.title"
+            :titulo-filme="filme.original_title"
             :link-geral="ondeVer.link"
           />
           <p class="fonte">
@@ -200,7 +201,8 @@ function voltar() {
           </p>
         </div>
         <p v-else class="texto-suave">
-          Ainda não há informação sobre plataformas para este filme.
+          Ainda não há informação sobre plataformas para este filme. Pode estar ainda no
+          cinema — experimenta procurar nas fontes abaixo.
         </p>
 
         <!-- Aparece sempre: pesquisa o filme noutras plataformas -->
