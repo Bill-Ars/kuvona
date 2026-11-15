@@ -17,7 +17,9 @@ import {
   LoaderCircle,
   CircleExclamationPoint,
   RotateCcw,
+  Search,
 } from "@lucide/vue";
+import { outrasFontes } from "@/utils/plataformas";
 import { useFilme } from "@/composables/useFilme";
 import { urlImagem } from "@/services/tmdb";
 import { ano, nota, duracao, dataPorExtenso } from "@/utils/formatacao";
@@ -36,6 +38,11 @@ const { filme, aCarregar, erro, carregar, elenco, realizador, trailer, ondeVer, 
 
 const fundo = computed(() => urlImagem(filme.value?.backdrop_path, "w1280"));
 const poster = computed(() => urlImagem(filme.value?.poster_path, "w500"));
+
+// Links de pesquisa: Netflix, YouTube, Prime Video e Google
+const fontes = computed(() =>
+  filme.value ? outrasFontes(filme.value.title, filme.value.release_date?.slice(0, 4)) : []
+);
 
 // O trailer só carrega quando se carrega no botão (poupa dados móveis)
 const verTrailer = ref(false);
@@ -167,9 +174,24 @@ function voltar() {
               (pode estar no mesmo serviço aqui):
             </template>
           </p>
-          <ListaPlataformas titulo="Incluído na subscrição" :plataformas="ondeVer.subscricao" />
-          <ListaPlataformas titulo="Alugar" :plataformas="ondeVer.alugar" />
-          <ListaPlataformas titulo="Comprar" :plataformas="ondeVer.comprar" />
+          <ListaPlataformas
+            titulo="Incluído na subscrição"
+            :plataformas="ondeVer.subscricao"
+            :titulo-filme="filme.title"
+            :link-geral="ondeVer.link"
+          />
+          <ListaPlataformas
+            titulo="Alugar"
+            :plataformas="ondeVer.alugar"
+            :titulo-filme="filme.title"
+            :link-geral="ondeVer.link"
+          />
+          <ListaPlataformas
+            titulo="Comprar"
+            :plataformas="ondeVer.comprar"
+            :titulo-filme="filme.title"
+            :link-geral="ondeVer.link"
+          />
           <p class="fonte">
             Dados de disponibilidade: JustWatch, via TMDB.
             <a :href="ondeVer.link" target="_blank" rel="noopener">
@@ -180,6 +202,19 @@ function voltar() {
         <p v-else class="texto-suave">
           Ainda não há informação sobre plataformas para este filme.
         </p>
+
+        <!-- Aparece sempre: pesquisa o filme noutras plataformas -->
+        <div class="outras-fontes">
+          <h4>Procurar noutras fontes</h4>
+          <ul>
+            <li v-for="f in fontes" :key="f.nome">
+              <a :href="f.link" target="_blank" rel="noopener" class="botao-secundario">
+                <Search :size="14" />
+                {{ f.nome }}
+              </a>
+            </li>
+          </ul>
+        </div>
       </section>
 
       <!-- ===== Elenco ===== -->
@@ -421,6 +456,29 @@ function voltar() {
 }
 .texto-suave {
   color: var(--texto-suave);
+}
+.outras-fontes {
+  margin-top: 1.25rem;
+}
+.outras-fontes h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  margin-bottom: 0.6rem;
+}
+.outras-fontes ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.outras-fontes a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 /* Trailer: vídeo 16:9 numa moldura de vidro */
