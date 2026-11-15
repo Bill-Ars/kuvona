@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { Star, Film } from "@lucide/vue";
 import { urlImagem } from "@/services/tmdb";
 import { ano, nota } from "@/utils/formatacao";
+import BotaoFavorito from "@/components/BotaoFavorito.vue";
 
 // O pai (FilmesView) passa o filme por props
 const props = defineProps({
@@ -13,27 +14,33 @@ const poster = computed(() => urlImagem(props.filme.poster_path));
 </script>
 
 <template>
-  <RouterLink :to="{ name: 'filme', params: { id: filme.id } }" class="cartao">
-    <div class="poster">
-      <img v-if="poster" :src="poster" :alt="filme.title" loading="lazy" />
-      <div v-else class="sem-poster"><Film :size="40" :stroke-width="1.5" /></div>
+  <!-- O botão fica FORA do link: um <button> dentro de um <a> não é HTML válido,
+       e clicar no coração abriria o filme -->
+  <div class="cartao">
+    <RouterLink :to="{ name: 'filme', params: { id: filme.id } }" class="ligacao">
+      <div class="poster">
+        <img v-if="poster" :src="poster" :alt="filme.title" loading="lazy" />
+        <div v-else class="sem-poster"><Film :size="40" :stroke-width="1.5" /></div>
 
-      <span class="nota">
-        <Star :size="12" fill="currentColor" />
-        {{ nota(filme.vote_average) }}
-      </span>
-    </div>
+        <span class="nota">
+          <Star :size="12" fill="currentColor" />
+          {{ nota(filme.vote_average) }}
+        </span>
+      </div>
 
-    <div class="info">
-      <h3>{{ filme.title }}</h3>
-      <p>{{ ano(filme.release_date) }}</p>
-    </div>
-  </RouterLink>
+      <div class="info">
+        <h3>{{ filme.title }}</h3>
+        <p>{{ ano(filme.release_date) }}</p>
+      </div>
+    </RouterLink>
+
+    <BotaoFavorito :filme="filme" class="botao-favorito" />
+  </div>
 </template>
 
 <style scoped>
 .cartao {
-  display: block;
+  position: relative;
   border-radius: var(--raio-grande);
   padding: 0.5rem;
   background: linear-gradient(180deg, var(--vidro-forte), var(--vidro));
@@ -46,6 +53,19 @@ const poster = computed(() => urlImagem(props.filme.poster_path));
   border-color: var(--borda-vidro-forte);
   box-shadow: var(--reflexo), 0 24px 40px -18px rgba(157, 107, 255, 0.55),
     0 10px 30px -12px rgba(255, 138, 61, 0.35);
+}
+.ligacao {
+  display: block;
+  border-radius: calc(var(--raio-grande) - 6px);
+}
+.ligacao:focus-visible {
+  outline-offset: 4px;
+}
+/* O coração no canto do póster (0.5rem de padding + 0.5rem de margem) */
+.botao-favorito {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }
 .poster {
   position: relative;

@@ -23,6 +23,7 @@ import { urlImagem } from "@/services/tmdb";
 import { ano, nota, duracao, dataPorExtenso } from "@/utils/formatacao";
 import CartaoFilme from "@/components/CartaoFilme.vue";
 import ListaPlataformas from "@/components/ListaPlataformas.vue";
+import BotaoFavorito from "@/components/BotaoFavorito.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -125,10 +126,13 @@ function voltar() {
               Realização: <strong>{{ realizador }}</strong>
             </p>
 
-            <button v-if="trailer && !verTrailer" class="botao" @click="verTrailer = true">
-              <Play :size="16" fill="currentColor" />
-              Ver trailer
-            </button>
+            <div class="accoes">
+              <button v-if="trailer && !verTrailer" class="botao" @click="verTrailer = true">
+                <Play :size="16" fill="currentColor" />
+                Ver trailer
+              </button>
+              <BotaoFavorito :filme="filme" variante="completo" />
+            </div>
           </div>
         </div>
       </header>
@@ -352,11 +356,17 @@ function voltar() {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  margin: 1rem 0 1.5rem;
+  margin-top: 1rem;
   color: var(--texto-suave);
 }
 .realizador strong {
   color: var(--texto);
+}
+.accoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
 /* ===== Blocos ===== */

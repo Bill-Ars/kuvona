@@ -1,5 +1,9 @@
 <script setup>
 import { Clapperboard, House, Film, Heart } from "@lucide/vue";
+import { useFavoritos } from "@/composables/useFavoritos";
+
+// O contador dos favoritos actualiza-se sozinho (estado partilhado)
+const { total } = useFavoritos();
 
 // As ligações da barra, geradas com v-for
 const ligacoes = [
@@ -21,6 +25,7 @@ const ligacoes = [
         <RouterLink v-for="l in ligacoes" :key="l.texto" :to="l.para">
           <component :is="l.icone" :size="17" />
           <span>{{ l.texto }}</span>
+          <span v-if="l.texto === 'Favoritos' && total" class="contador">{{ total }}</span>
         </RouterLink>
       </div>
     </nav>
@@ -97,6 +102,19 @@ const ligacoes = [
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 14px -4px rgba(157, 107, 255, 0.6);
 }
+.contador {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(160deg, #ff7aa8, var(--violeta));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
 .linha-luz {
   height: 1px;
   background: var(--gradiente);
@@ -105,7 +123,7 @@ const ligacoes = [
 
 /* Telemóvel: só os ícones */
 @media (max-width: 560px) {
-  .ligacoes a span {
+  .ligacoes a span:not(.contador) {
     display: none;
   }
   .ligacoes a {
