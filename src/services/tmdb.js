@@ -42,8 +42,6 @@ function mensagemDeErro(estado) {
 
 // ===== Funções que os composables usam =====
 
-// ===== Funções que os composables usam =====
-
 export function obterPopulares(pagina = 1) {
   return pedir("/movie/popular", { page: pagina });
 }
@@ -81,6 +79,16 @@ export function descobrirFilmes(filtros = {}, pagina = 1) {
 export function obterGeneros() {
   return pedir("/genre/movie/list");
 }
+
+// Um filme com tudo: elenco, vídeos, onde ver e recomendações.
+// append_to_response junta vários pedidos num só (poupa dados)
+export function obterFilme(id) {
+  return pedir(`/movie/${id}`, {
+    append_to_response: "credits,videos,watch/providers,recommendations",
+    include_video_language: "pt,en,null", // trailers em português ou inglês
+  });
+}
+
 // Endereço completo de uma imagem (póster ou fundo)
 export function urlImagem(caminho, tamanho = "w342") {
   return caminho ? `https://image.tmdb.org/t/p/${tamanho}${caminho}` : null;

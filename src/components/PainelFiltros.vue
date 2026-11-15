@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from "vue";
+import { Tags, CalendarDays, Star, Earth, ArrowUpDown, RotateCcw, Info } from "@lucide/vue";
+import SeletorVidro from "@/components/SeletorVidro.vue";
 import { useGeneros } from "@/composables/useGeneros";
 
 const props = defineProps({
@@ -10,31 +12,40 @@ const emit = defineEmits(["mudar", "limpar"]);
 
 const { generos } = useGeneros();
 
+// Géneros: a lista chega da API, por isso é um computed
+const opcoesGenero = computed(() => [
+  { valor: "", texto: "Todos os géneros" },
+  ...generos.value.map((g) => ({ valor: String(g.id), texto: g.name })),
+]);
+
 // Anos: deste ano até 1950
 const anoActual = new Date().getFullYear();
-const anos = Array.from({ length: anoActual - 1949 }, (_, i) => anoActual - i);
+const opcoesAno = [
+  { valor: "", texto: "Todos os anos" },
+  ...Array.from({ length: anoActual - 1949 }, (_, i) => {
+    const a = String(anoActual - i);
+    return { valor: a, texto: a };
+  }),
+];
 
-const notas = [
+const opcoesNota = [
   { valor: "", texto: "Qualquer nota" },
-  { valor: "5", texto: "⭐ 5 ou mais" },
-  { valor: "6", texto: "⭐ 6 ou mais" },
-  { valor: "7", texto: "⭐ 7 ou mais" },
-  { valor: "8", texto: "⭐ 8 ou mais" },
+  ...[5, 6, 7, 8].map((n) => ({ valor: String(n), texto: `${n} ou mais`, estrela: true })),
 ];
 
-const paises = [
+const opcoesPais = [
   { valor: "", texto: "Todos os países" },
-  { valor: "MZ", texto: "🇲🇿 Moçambique" },
-  { valor: "AO", texto: "🇦🇴 Angola" },
-  { valor: "ZA", texto: "🇿🇦 África do Sul" },
-  { valor: "NG", texto: "🇳🇬 Nigéria (Nollywood)" },
-  { valor: "BR", texto: "🇧🇷 Brasil" },
-  { valor: "PT", texto: "🇵🇹 Portugal" },
-  { valor: "US", texto: "🇺🇸 Estados Unidos" },
-  { valor: "IN", texto: "🇮🇳 Índia (Bollywood)" },
+  { valor: "MZ", codigo: "MZ", texto: "Moçambique" },
+  { valor: "AO", codigo: "AO", texto: "Angola" },
+  { valor: "ZA", codigo: "ZA", texto: "África do Sul" },
+  { valor: "NG", codigo: "NG", texto: "Nigéria (Nollywood)" },
+  { valor: "BR", codigo: "BR", texto: "Brasil" },
+  { valor: "PT", codigo: "PT", texto: "Portugal" },
+  { valor: "US", codigo: "US", texto: "Estados Unidos" },
+  { valor: "IN", codigo: "IN", texto: "Índia (Bollywood)" },
 ];
 
-const ordens = [
+const opcoesOrdem = [
   { valor: "", texto: "Mais populares" },
   { valor: "vote_average.desc", texto: "Melhor classificados" },
   { valor: "primary_release_date.desc", texto: "Mais recentes" },
@@ -45,104 +56,89 @@ const ordens = [
 const temFiltros = computed(() => Object.values(props.filtros).some((v) => v));
 
 // Avisa o pai: { genero: "16" }, { ano: "2024" }...
-function mudar(campo, evento) {
-  emit("mudar", { [campo]: evento.target.value });
+function mudar(campo, valor) {
+  emit("mudar", { [campo]: valor });
 }
 </script>
 
 <template>
-  <div class="filtros">
-    <label>
-      <span>Género</span>
-      <!-- :key força o select a redesenhar quando a lista de géneros chega da API -->
-      <select :key="generos.length" :value="filtros.genero" @change="mudar('genero', $event)">
-        <option value="">Todos os géneros</option>
-        <option v-for="g in generos" :key="g.id" :value="String(g.id)">
-          {{ g.name }}
-        </option>
-      </select>
-    </label>
+  <div class="painel vidro">
+    <div class="filtros">
+      <SeletorVidro
+        rotulo="Género"
+        :icone="Tags"
+        :valor="filtros.genero"
+        :opcoes="opcoesGenero"
+        @mudar="mudar('genero', $event)"
+      />
+      <SeletorVidro
+        rotulo="Ano"
+        :icone="CalendarDays"
+        :valor="filtros.ano"
+        :opcoes="opcoesAno"
+        @mudar="mudar('ano', $event)"
+      />
+      <SeletorVidro
+        rotulo="Classificação"
+        :icone="Star"
+        :valor="filtros.notaMin"
+        :opcoes="opcoesNota"
+        @mudar="mudar('notaMin', $event)"
+      />
+      <!-- A pesquisa por texto da TMDB não aceita país nem ordem -->
+      <SeletorVidro
+        rotulo="País de origem"
+        :icone="Earth"
+        :valor="filtros.pais"
+        :opcoes="opcoesPais"
+        :desactivado="comPesquisa"
+        @mudar="mudar('pais', $event)"
+      />
+      <SeletorVidro
+        rotulo="Ordenar por"
+        :icone="ArrowUpDown"
+        :valor="filtros.ordem"
+        :opcoes="opcoesOrdem"
+        :desactivado="comPesquisa"
+        @mudar="mudar('ordem', $event)"
+      />
 
-    <label>
-      <span>Ano</span>
-      <select :value="filtros.ano" @change="mudar('ano', $event)">
-        <option value="">Todos os anos</option>
-        <option v-for="a in anos" :key="a" :value="String(a)">{{ a }}</option>
-      </select>
-    </label>
+      <button v-if="temFiltros" class="botao-secundario limpar" @click="emit('limpar')">
+        <RotateCcw :size="15" />
+        Limpar
+      </button>
+    </div>
 
-    <label>
-      <span>Classificação</span>
-      <select :value="filtros.notaMin" @change="mudar('notaMin', $event)">
-        <option v-for="n in notas" :key="n.valor" :value="n.valor">{{ n.texto }}</option>
-      </select>
-    </label>
-
-    <!-- A pesquisa por texto da TMDB não aceita país nem ordem -->
-    <label :class="{ desactivado: comPesquisa }">
-      <span>País de origem</span>
-      <select :value="filtros.pais" :disabled="comPesquisa" @change="mudar('pais', $event)">
-        <option v-for="p in paises" :key="p.valor" :value="p.valor">{{ p.texto }}</option>
-      </select>
-    </label>
-
-    <label :class="{ desactivado: comPesquisa }">
-      <span>Ordenar por</span>
-      <select :value="filtros.ordem" :disabled="comPesquisa" @change="mudar('ordem', $event)">
-        <option v-for="o in ordens" :key="o.valor" :value="o.valor">{{ o.texto }}</option>
-      </select>
-    </label>
-
-    <button v-if="temFiltros" class="botao-secundario limpar" @click="emit('limpar')">
-      ✕ Limpar filtros
-    </button>
+    <p v-if="comPesquisa" class="nota-pesquisa">
+      <Info :size="14" />
+      Durante a pesquisa por nome, o país e a ordem não estão disponíveis.
+    </p>
   </div>
-
-  <p v-if="comPesquisa" class="nota-pesquisa">
-    Durante a pesquisa por nome, o país e a ordem não estão disponíveis.
-  </p>
 </template>
 
 <style scoped>
+.painel {
+  position: relative;
+  z-index: 5; /* a lista aberta fica por cima da grelha */
+  border-radius: var(--raio-grande);
+  padding: 1rem 1.1rem;
+}
 .filtros {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: flex-end;
-  margin-bottom: 0.5rem;
-}
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  flex: 1 1 150px;
-}
-label span {
-  font-size: 0.8rem;
-  color: var(--cor-texto-suave);
-}
-select {
-  background: var(--cor-cartao);
-  color: var(--cor-texto);
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  padding: 0.55rem 0.6rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-select:focus {
-  outline: none;
-  border-color: var(--cor-amarelo);
-}
-.desactivado {
-  opacity: 0.45;
 }
 .limpar {
-  margin-bottom: 0;
   flex: 0 0 auto;
+  padding-block: 0.7rem;
 }
 .nota-pesquisa {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
   font-size: 0.8rem;
-  color: var(--cor-texto-suave);
+  color: var(--texto-suave);
 }
 </style>
