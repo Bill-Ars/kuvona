@@ -30,8 +30,8 @@ const ligacoes = [
       </div>
     </nav>
 
-    <!-- Linha de luz laranja → violeta → azul -->
-    <div class="linha-luz"></div>
+    <!-- Faixa com as cores da bandeira de Moçambique, como uma capulana -->
+    <div class="faixa-capulana" aria-hidden="true"></div>
   </header>
 </template>
 
@@ -115,10 +115,19 @@ const ligacoes = [
   background: linear-gradient(160deg, #ff7aa8, var(--violeta));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
-.linha-luz {
-  height: 1px;
-  background: var(--gradiente);
-  opacity: 0.6;
+.faixa-capulana {
+  height: 3px;
+  background: linear-gradient(
+    to right,
+    #009a44 0 33%,
+    #0b0b0f 33% 38%,
+    #fcd116 38% 62%,
+    #0b0b0f 62% 67%,
+    #d21034 67% 100%
+  );
+  /* brilho suave por baixo, no estilo do vidro */
+  box-shadow: 0 0 14px rgba(252, 209, 22, 0.35);
+  opacity: 0.9;
 }
 
 /* Telemóvel: só os ícones */

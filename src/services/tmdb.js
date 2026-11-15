@@ -80,6 +80,22 @@ export function obterGeneros() {
   return pedir("/genre/movie/list");
 }
 
+// Os filmes em alta esta semana (para a página Início)
+export function obterTendencias() {
+  return pedir("/trending/movie/week");
+}
+
+// Sugestão para o fim-de-semana: filmes bem classificados numa página
+// aleatória de 1 a 10, para a sugestão mudar de cada vez
+export function obterBemClassificados() {
+  return pedir("/discover/movie", {
+    page: Math.floor(Math.random() * 10) + 1,
+    "vote_average.gte": 7.5,
+    "vote_count.gte": 500,
+    sort_by: "popularity.desc",
+  });
+}
+
 // Um filme com tudo: elenco, vídeos, onde ver e recomendações.
 // append_to_response junta vários pedidos num só (poupa dados)
 export function obterFilme(id) {
